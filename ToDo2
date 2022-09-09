@@ -1,0 +1,101 @@
+ 
+ ;part 1
+ ; find the energy
+ 
+ PRESERVE8 
+	THUMB 
+
+	AREA RESET, DATA, READONLY 
+	EXPORT __Vectors
+__Vectors 
+	DCD 0x20001000 ; stack pointer value when stack is empty 
+	DCD Reset_Handler ; reset vector ALIGN 
+
+
+energyp DCD energy; SUMP IS  pointer to SUM 
+N DCD 10 ;size of array 
+NUM1 DCD 1,2,3, 4, 5, 6, 7, 8, 9 ,10
+POINTER DCD NUM1;POINTER IS pointer to NUM1
+	AREA MYRAM, DATA, READWRITE 
+energy DCD 0 ;to put the value of sum 
+	AREA MYCODE, CODE, READONLY 
+	ENTRY 
+	EXPORT Reset_Handler 
+Reset_Handler 
+
+	LDR R1, N ; load size of array -; a counter for how many elements are left to process 
+	LDR R2, =NUM1 ; load base pointer of array 
+	MOV R0, #0 ; initialize accumulator to zero 
+LOOP 
+	LDR R3, [R2], #4 ; load value from array increment array pointer to next word 
+	MUL R5,R3,R3
+	ADD R0,R0,R5
+	
+	SUBS R1, R1, #1 ; decrement  counter
+	BGT LOOP ; keep looping until counter is  not zero(if it equals
+;0 that means we have checked all the values in the array)
+	LDR R7,N
+	UDIV  R0,R0,R7
+	LDR R4, energyp ; get memory address to store sum 
+	STR R0, [R4] ; store answer 
+	LDR R6, [R4] ; Check the value in the SUM 
+	B STOP
+
+STOP 
+	B STOP
+	END
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+;part 2
+
+
+; Find zero crossing count
+;Name:Maha Maher Mali
+;ID:1200746
+		PRESERVE8 
+		THUMB 
+
+	AREA RESET, DATA, READONLY 
+	EXPORT __Vectors
+__Vectors 
+	DCD 0x20001000 ; stack pointer value when stack is empty 
+	DCD Reset_Handler ; reset vector ALIGN 
+
+
+SUMtotala DCD sum; 
+N DCD 5 ;size of  the array N(N=N-1)
+		;if the size of array for example is 6 we Take N=N-1=5
+		;if the size of array is 6 the last elemnt in array which is 4 for example 
+		;there is no more number after 4 to compare with number 4
+		; so we take the size of array-1
+NUM1 DCD -1,2,3,-2,-5,4;elemnt in the array
+POINTER DCD NUM1;
+	AREA MYRAM, DATA, READWRITE 
+sum DCD 0 ;to put the value of sum (how many time cross the x axisis)
+	AREA MYCODE, CODE, READONLY 
+	ENTRY 
+	EXPORT Reset_Handler 
+Reset_Handler 
+
+	LDR R1, N ;R1=N(R1=5)
+	LDR R2, =NUM1 ; load base pointer of array 
+	MOV R0, #0 ; initialize THE counter to zero 
+	
+LOOP 
+	LDR R3, [R2], #4 ; load value from array increment array pointer to next word  (first elemnt in array)
+	LDR R5,[R2];the next elemnt in array
+	LSR R3,R3,#31;to take the bit to check the sign of number
+	LSR R5,R5,#31;to take the bit to check the sign of number
+	EOR R5,R5,R3; if the two register have the same sign so the result of XOR IS 0
+				; if the two register NOT have the same sign so the result of XOR IS 1
+	ADD R0,R0,R5
+	SUBS R1, R1, #1 ; Decrement  counter (R1=R1-1)
+	BGT LOOP ; keep looping until counter is not reach to zero(to the end of array)
+	LDR R4, SUMtotala ; get memory address to store sum 
+	STR R0, [R4] ; store answer 
+	LDR R6, [R4] ; Check the value in the SUM 
+	
+
+STOP 
+	B STOP
+	END
